@@ -22,13 +22,13 @@ for i, df in  enumerate(dataframes, 1):
 colunas_ref = dataframes[0].columns
 for i, df in enumerate(dataframes, 1):
     if not df.columns.equals(colunas_ref):
-        raise ValueError(f"Estrutura difirente encontrada no arquivo {i}")
+        raise ValueError(f"Estrutura diferente encontrada no arquivo {i}")
 
 # Consolidação
 base_df = pd.concat(dataframes, ignore_index=True)
 
 # Escrita do arquivo final
 OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
-output_file = OUTPUT_DIR / "base_2025_consolidada.csv"
+output_file = OUTPUT_DIR / "01_base_intermediaria_2025.csv"
 
 base_df.to_csv(output_file, index=False, sep=";", encoding="latin1")

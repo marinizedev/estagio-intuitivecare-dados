@@ -73,3 +73,23 @@ Arquivos de grande volume (como CSVs consolidados e arquivos brutos) não foram 
 Esses arquivos são gerados automaticamente a partir dos scripts disponíveis no projeto, garantindo reprodutividade sem comprometer o versionamento do código.
 
 ---
+
+## 7. Validação de Dados (Teste 2.1)
+
+A partir do CSV consolidado gerado na etapa 1.3, foi implementada uma etapa de validação dos dados com o bjetivo de garantir consistência mínima antes das etapas de enriquecimento e agregação.
+
+Foram aplicadas as seguintes validações:
+- **CNPJ**: verificação de formato e cálculo dos dígitos verificadores, identificando registros inválidos;
+- **Razão Social**: validação de preenchimento, considerando valores nulos, vazios ou compostos apenas por espaços;
+- **Valor de Despesas**: verificação de valores numéricos positivos, identificando registros zerados ou negativos.
+
+### Tratamento de CNPJs inválidos (Trade-off técnico)
+
+Para CNPJs inválidos, optou-se por **não descatar os registros**, mas **marcá-los como inválidos por meio de flags de validação**.
+
+Essa abordagem foi escolhida considerando:
+- Preservação da rastreabilidade dos dados;
+- Evitar perda de informação potencialmente relevante;
+- Possibilidade de auditoria e reprocessamento futuro.
+
+Os registros inválidos permanecem no dataset, porém explicitamente identificados, permitindo decisões posteriores mais conscientes nas etapas seguintes do pipeline.

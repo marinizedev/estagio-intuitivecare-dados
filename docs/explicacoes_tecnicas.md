@@ -110,3 +110,20 @@ Nesta etapa, o CSV consolidado do teste 2.1 foi enriquecido com **novas colunas 
 - Preservação integral dos registros originais, garantindo rastreabilidade.
 - Simplicidade do pipeline e eficiência para o volume de dados esperado.
 - Registro explícito de valores ausentes facilita análises posteriores e auditoria.
+
+## 9. Agregação de Despesas por Operadora/UF
+
+Para consolidar e analosar os gastos, foi realizada uma **agregação dos dados** do CSV enriquecido, seguindo os critérios do teste:
+- **Agrupamento**: por `RazaoSocial` e `UF`;
+- **Cálculos aplicados**:
+    - `total_despesas`: soma das despesas por operadora/UF;
+    - `media_trimestral`: média das despesas, considerando os trimestres disponíveis;
+    - `desvio_padrao`: desvio padrão das despesas, identificando variações significativas;
+- **Ordenação**: pelo `total_despesas`, do maior para o menor, facilitando identificação das operadoras com miores gastos;
+- **Tratamento de dados**: valores não numéricos em `ValorDespesas` foram convertidos para zero para evitar erros durante a agregação;
+- **Saída**: arquivo CSV final chamado `despesas_agregadas.csv`.
+
+### Justificativa técnica:
+- O agrupamento em memória foi considerado suficiente, dado o volume de dados do teste;
+- A agregação direta usando `groupby` do pandas garante simplicidade, clareza e rastreabilidade dos cálculos;
+- Mantém-se consistência com as etapas anteriores (validação e enriquecimento), permitindo análises futuras sem perda de informação.

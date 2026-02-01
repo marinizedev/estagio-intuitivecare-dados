@@ -53,6 +53,7 @@ Os arquivos trimestrais foram processados utilizando Python e a biblioteca Panda
 Como parte da consolidação (teste 1.3), o arquivo gerado foi padronizado para conter todas as colunas exigidas pelo enunciado do teste, ainda que algumas delas não estivessem disponíveis na fonte original. Nessas situações, os campos foram explicitamente criados e preenchidos com valores nulos, garantindo consistência estrutural e preparando o dataset para as etapas de validação e enriquecimento posteriores.
 
 Para fins de entrega do teste, o arquivo CSV consolidado é compactado em um arquivo ZIP conforme especificado no enunciado.
+
 ---
 
 ## 5. Trade-off Técnico: Processamento em Memória

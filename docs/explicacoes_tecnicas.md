@@ -93,3 +93,20 @@ Essa abordagem foi escolhida considerando:
 - Possibilidade de auditoria e reprocessamento futuro.
 
 Os registros inválidos permanecem no dataset, porém explicitamente identificados, permitindo decisões posteriores mais conscientes nas etapas seguintes do pipeline.
+
+## 8. Enriquecimento de Dados com Tratamento de Falhas (Teste 2.2)
+
+Nesta etapa, o CSV consolidado do teste 2.1 foi enriquecido com **novas colunas criadas no CSV final** a partir do cadastro da ANS: **RegistroANS, Modalidade e UF**.
+
+### Estrtégia adotada
+
+- Padronização dos CNPJs em ambos os datasets (somente números) para garantir consistência no join.
+- Left join usando `CNPJ_limpo` como chave, preservando todos os registros do consolidado.
+- CNPJs não encontrados no cadastro receberam  `"Não encontrado"` nas colunas adicionadas.
+- Duplicatas no cadastro da ANS foram resolvidas mantendo a primeira ocorrência.
+
+### Trade-offs
+
+- Preservação integral dos registros originais, garantindo rastreabilidade.
+- Simplicidade do pipeline e eficiência para o volume de dados esperado.
+- Registro explícito de valores ausentes facilita análises posteriores e auditoria.

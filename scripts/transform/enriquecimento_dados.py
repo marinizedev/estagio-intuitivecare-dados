@@ -10,7 +10,7 @@ OUTPUT_DIR = BASE_DIR / "data" / "processed"
 
 # Arquivos
 input_file = INPUT_DIR / "03_base_validada_2025.csv"
-ans_file = RAW_DIR / "Relatorio_cadop.csv"
+ans_file = RAW_DIR / "operadoras_ativas.csv"
 output_file = OUTPUT_DIR / "04_base_enriquecida_2025.csv"
 
 # Leitura dos dados

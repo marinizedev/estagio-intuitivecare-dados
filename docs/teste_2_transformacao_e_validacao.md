@@ -26,50 +26,113 @@ Os registros inválidos permanecem no dataset, porém explicitamente identificad
 
 ---
 
-## Enriquecimento de Dados com Tratamento de Falhas (Teste 2.2)
+## Teste Técnico (Itens 2.2 e 2.3)
 
-Nesta etapa, o CSV consolidado resultante do Teste 2.1 foi enriquecido com informações cadastrais da ANS, por meio da adição das colunas **RegistroANS, Modalidade e UF**.
+### Visão Geral
 
-### Estratégia adotada
+Este documento descreve, de forma clara e estruturada, todo o raciocínio, decisões técnicas e desafios enfrentados durante a execução dos intens **2.2 (Enriquecimento dos Dados)** e **2.3 (Agregação dos Dados)** do teste técnico.
 
-- Padronização dos CNPJs em ambos os datasets (remoção de caracteres não numéricos) para garantir consistência na chave de junção;
-- Utilização de **left join** com base no campo `CNPJ_limpo`, preservando integralmente os registros do CSV consolidado;
-- Registros sem correspondência no cadastro da ANS receberam o valor **"Não encontrado"** nas colunas adicionadas;
-- Duplicidades no cadastro da ANS foram tratadas mantendo-se a primeira ocorrência por CNPJ.
+O objetivo principal foi demonstrar não apenas o resultado final, mas também a **capacidade de análise crítica diante de inconsistências entre o enunciado e os dados reais, algo comum em cenários reais de mercado (que descobri na prática no processo deste teste).
 
-### Trade-offs técnicos
+### Contexto Geral do Problema
 
-- A escolha do **left join** garante rastreabilidade total dos dados originais, evitando perda de informações do consolidado;
-- A resolução simples de duplicatas no cadastro prioriza clareza e previsibilidade, adequada ao contexto e volume de dados do teste;
-- O registro explícito de valores ausentes facilita análises posteriores, validações adicionais e auditoria dos dados enriquecidos.
+O teste solicitava a construção de um pipeline de dados a partir de bases fornecidas, envolvendo:
+- Consolidação de dados de despesas
+- Enriquecimento com informações cadastrais das operadoras
+- Agregação para geração de métricas analíticas
 
----
+Durante a execução, foi identificado que **algumas expectativas do enunciado não correspondiam exatamente à estrutura e ao conteúdo dos arquivos fornecidos, exigindo análise exploratória, validações e ajustes técnicos.
 
-## Agregação de Despesas por Operadora e UF
+## Item 2.2 — Enriquecimento dos Dados
 
-Para consolidar e analisar os gastos, foi realizada a agregação dos dados a partir do CSV enriquecido, conforme os critérios estabelecidos no teste.
+### Objetivo
 
-### Estratégia de agregação
+Enriquecer a base consolidada de despesas com informações cadastrais das operadoras de plano de saúde, utilizando como chave o registro da ANS.
 
-- **Agrupamento**: realizado por `RazaoSocial` e `UF`;
-- **Cálculos aplicados**:
-    - `total_despesas`: soma total das despesas por operadora e UF;
-    - `media_trimestral`: média das despesas com base nos registros disponíveis;
-    - `desvio_padrao`: cálculo do desvio padrão para identificar variações relevantes nos valores de despesas;
-- **Ordenação**: os resultados foram ordenados pelo `total_despesas`, do maior para o menor, facilitando a identificação das operadoras com maiores gastos;
-- **Tratamento de dados**: valores não numéricos na coluna `ValorDespesas` foram convertidos para zero, evitando falhas durante o processo de agregação;
-- **Saída**: geração do arquivo final `despesas_agregadas.csv`.
+### Fontes de Dados
 
-### Justificativa técnica:
+- **Base consolidada de despesas** (02_base_consolidada_2025.csv)
+- **Cadastro de opeadoras ativas** (operadoras_ativas.csv)
 
-- O processamento em memória foi considerado adequado, dado o volume de dados envolvido no teste;
-- A utilização do método `groupby` do pandas garante simplicidade, clareza e rastreabilidade dos cálculos realizados;
--  A abordagem mantém consistência com as etapas anteriores de validação e enriquecimento, permitindo análises futuras sem perda de informação ou integridade dos dados.
+### Desafio Encontrado
 
-### Organização dos arquivos processados
+O enunciado sugeria um relacionamento direto entre as bases, porém:
+- As colunas de chave possuíam **nomes diferentes**:
+    - `REG_ANS` na base de despesas
+    - `REGISTRO_OPERADORA` no cadastro
+- Os dados exigiram **padronização de tipo e limpeza** para garantir correspondência correta
 
-Os arquivos na pasta `data/processed` seguem uma numeração incremental (`01_, 02_, 03_, 04_`) para representar cada etapa do pipeline de dados. Essa abordagem foi adotada para garantir rastreabilidade, clareza do fluxo de processamento e facilidade de auditoria. **Os nomes exigidos no enunciado foram respeitados nos artefatos finais de entrega, enquanto os arquivos intermediários seguem uma convenção técnica para organização do pipeline**.
+Sem esse tratamento, o processo de `merge` resultava em registros sem correspondência (campos nulos).
 
-### Compactação dos arquivos
+### Estratégia Adotada
 
-Embora o enunciado mencione a compactação do CSV ao final do teste 1.3, optou-se por manter os arquivos intermediários em formato CSV durante o desenvolvimento para facilitar inspeção, validação e rastreabilidade do pipeline. Para fins de entrega, todos os artefatos finais e intermediários foram compactados em um único arquivo `Teste_Marinize_Santana.zip`, conforme solicitado ao final do teste 2.3.
+1. Leitura dos arquivos CSV com separador correto (;) e encoding `latin1`
+2. Padronização das colunas-chave:
+    - Conversão para `string`
+    - Remoção de espaços em branco
+3. Seleção apenas das colunas necessárias do cadastro
+4. Remoção de duplicidades no cadastro
+5. Realização de **LEFT JOIN**, garantindo a preservação de todos os registros de despesas
+6. Tratamento de registros sem correspondência
+
+### Validação do Resultado
+
+Após as correções:
+- Foram identificados **2.095.185 registros com correspondência válida** no cadastro
+- As colunas `Razao_Social`, `Modalidade` e `UF` foram corretamente preenchidas
+- O arquivo final `04_base_enriquecida_2025.csv` foi gerado com sucesso
+
+Este resultado confirmou que o enriquecimento foi executado corretamente, apesar das inconsistências iniciais entre enunciado e dados reais.
+
+## Item 2.3 — Agregação dos Dados
+
+### Objetivo
+
+Gerar uma base analítica agregada, consolidando os valores de despesas por operadora e unidade federativa, produzindo métricas estatísticas.
+
+
+### Base Utilizada
+
+- `04_base_enriquecida_2025.csv`
+
+### Métricas Geradas
+
+Para cada combinação de **Razão Social** e **UF**, foram calculados:
+- **Total de despesas**
+- **Média trimestral das despesas**
+- **Desvio padrão**
+
+### Desafio Encontrado
+
+Durante a primeira execução:
+- O arquivo agregado foi gerado corretamente
+- Porém, ao abrir o CSV, aparentava conter apenas os cabeçalhos
+
+Após análise, identificou-se que:
+- O problema estava relacionado à **seleção incorreta do nome da coluna** (`RazaoSocial` vs `Razao_Social`)
+- Isso resultava em um DataFrame vazio antes da agregação
+
+### Correção Aplicada
+
+- Ajuste dos nomes das colunas para refletirem exatamente o CSV enriquecido
+- Inclusão de prints diagnósticos antes da agregação para validação do volume de dados
+- Garantia de conversão correta da coluna `ValorDespesas` para tipo numérico
+
+### Resultado Final
+
+Após as correções:
+- A agregação foi realizada com sucesso
+- O arquivo `despesas_agregadas.csv` passou a conter dados válidos
+- Valores nulos de desvio padrão (casos com apenas um trimestre) foram tratados
+
+### Considerações Finais
+
+Este teste evidenciou um cenário comum no mercado de dados: **enunciados nem sempre refletem perfeitamente a realidade dos dados disponíveis**.
+
+A solução exigiu:
+- Leitura crítica do problema 
+- Exploração dos dados
+- Validação contínua 
+- Ajustes técnicos fundamentados
+
+Mais do que gerar arquivos CSV, o processo demontrou capacidade analítica, resiliência e adaptação — competências essenciais para atuação profissional em dados.

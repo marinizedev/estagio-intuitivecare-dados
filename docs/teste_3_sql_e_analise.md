@@ -265,3 +265,9 @@ As queries analíticas desenvolvidas atendem integralmente aos requisitos do Tes
 Essas análises demonstram domínio tanto de modelagem de dados quanto de raciocínio analítico em SQL.
 
 ---
+
+Devido à heterogeneidade estrutural dos arquivos CSV gerados nas etapas anteriores, foi adotada uma abordagem em duas camadas:
+- uma camada de staging, fiel à estrutura original dos arquivos;
+- uma camada analítica normalizada, projetada para integridade, performance e clareza das análises.
+
+As tabelas de staging foram projetadas para refletir fielmente a estrutura dos arquivos CSV gerados nas etapas anteriores do pipeline. Essa abordagem permite a ingestão segura dos dados, mesmo diante de inconsistências como valores nulos, tipos divergentes e colunas redundantes. A normalização, aplicação de regras de integridade e otimização para análise são realizadas posteriormente nas tabelas finais.

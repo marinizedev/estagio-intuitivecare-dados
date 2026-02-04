@@ -1,36 +1,63 @@
 import pandas as pd
 from pathlib import Path
 
-# Configuração de caminhos
+# -------------------------------
+# Caminhos
+# -------------------------------
 BASE_DIR = Path(__file__).resolve().parents[2]
-INPUT_DIR = BASE_DIR / "data" / "processed"
-OUTPUT_DIR =BASE_DIR / "data" / "processed"
+DATA_PROCESSED = BASE_DIR / "data" / "processed"
 
-input_file = INPUT_DIR / "04_base_enriquecida_2025.csv"
-output_file = OUTPUT_DIR / "despesas_agregadas.csv"
+csv_enriquecido = DATA_PROCESSED / "04_base_enriquecida_2025.csv"
+csv_agregado = DATA_PROCESSED / "despesas_agregadas.csv"
 
+# -------------------------------
 # Leitura do CSV enriquecido
-df = pd.read_csv(input_file, sep=";", encoding="latin1")
+# -------------------------------
+df = pd.read_csv(csv_enriquecido, sep=";", encoding="latin1")
 
-# Garantir que VallorDespesas seja numérico
+# -------------------------------
+# Seleção das colunas necessárias
+# -------------------------------
+df = df[[
+    "Razao_Social",
+    "UF",
+    "Ano",
+    "Trimestre",
+    "ValorDespesas"
+]]
+
+# -------------------------------
+# Limpeza e tipos
+# -------------------------------
 df["ValorDespesas"] = pd.to_numeric(df["ValorDespesas"], errors="coerce").fillna(0)
 
-# Agregação por RazaoSocial e UF
-df_agg = df.groupby(["RazaoSocial", "UF"]).agg (
+df["Razao_Social"] = df["Razao_Social"].astype(str).str.strip()
+df["UF"] = df["UF"].astype(str).str.strip()
 
-    total_despesas=pd.NamedAgg(column="ValorDespesas", aggfunc="sum"),
+# Remover registros sem razão social ou UF
+#df = df[(df["RazaoSocial"] != "") & (df["UF"] != "")]
+print(df.head())
+print("Linhas antes da agregação:", len(df))
+# -------------------------------
+# Agregação
+# -------------------------------
+df_agregado = (
+    df.groupby(["Razao_Social", "UF"])
+      .agg(
+          total_despesas=("ValorDespesas", "sum"),
+          media_trimestral=("ValorDespesas", "mean"),
+          desvio_padrao=("ValorDespesas", "std")
+      )
+      .reset_index()
+)
 
-    media_trimestral=pd.NamedAgg(column="ValorDespesas", aggfunc="mean"),
+# Substituir NaN do desvio padrão (casos com apenas 1 trimestre)
+df_agregado["desvio_padrao"] = df_agregado["desvio_padrao"].fillna(0)
 
-    desvio_padrao=pd.NamedAgg(column="ValorDespesas", aggfunc="std")
-).reset_index()
+# -------------------------------
+# Exportação
+# -------------------------------
+df_agregado.to_csv(csv_agregado, sep=";", index=False, encoding="latin1")
 
-# Ordenação do maior para o menor total de despesas
-df_agg = df_agg.sort_values(by="total_despesas", ascending=False)
-
-# Salvando o CSV final
-OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
-df_agg.to_csv(output_file, index=False, sep=";", encoding="latin1")
-
-print("Agregação concluída com sucesso!")
-print(f"Arquivo CSV gerado: {output_file}")
+print("despesas_agregadas.csv gerado com sucesso!")
+print(df_agregado.head())

@@ -4,7 +4,7 @@ Este documento descreve, de forma objetiva, as decisões técnicas adotadas na e
 
 ---
 
-## 3.1. Arquivos Utilizados
+## Arquivos Utilizados
 
 Para a modelagem e criação das tabelas no banco de dados, foram utilizados os seguintes arquivos CSV, gerados nas etapas anteriores do pipeline:
 
@@ -16,7 +16,7 @@ Esses arquivos representam diferentes níveis do pipeline (consolidado, enriquec
 
 ---
 
-## 3.2. Estratégia de Modelagem
+## Estratégia de Modelagem
 
 ### Abordagem escolhida: Tabelas Normalizadas
 
@@ -34,7 +34,7 @@ Foi adotada uma modelagem **normalizada**, com separação lógica entre:
 
 ---
 
-## 3.3. Estrutura das Tabelas
+## Estrutura das Tabelas
 
 ### Tabela `operadoras`
 
@@ -86,7 +86,7 @@ Campos:
 
 ---
 
-## 3.4. Trade-off Técnico — Tipos de Dados
+## Trade-off Técnico — Tipos de Dados
 
 - **Valores monetários**: `DECIMAL(15,2)` (precisão, evita problemas do FLOAT)  
 - **Ano**: `INT`  
@@ -96,7 +96,7 @@ Justificativa: compatível com os dados originais, facilita leitura e rastreabil
 
 ---
 
-## 3.5. Abordagem em Camadas — Staging e Normalização
+## Abordagem em Camadas — Staging e Normalização
 
 Devido à heterogeneidade estrutural dos arquivos CSV gerados nas etapas anteriores, foi adotada uma abordagem em **duas camadas**:
 
@@ -119,7 +119,7 @@ Essa alternativa substituiu temporariamente o `LOAD DATA INFILE`, mantendo integ
 
 ---
 
-## 3.6. Queries Analíticas em SQL
+## Queries Analíticas em SQL
 
 ### Bases Utilizadas
 
@@ -186,7 +186,7 @@ Essa alternativa substituiu temporariamente o `LOAD DATA INFILE`, mantendo integ
 
 ---
 
-## 3.7. Considerações Finais
+## Considerações Finais
 
 - Modelagem mantém integridade referencial e evita redundância  
 - Abordagem em camadas garante ingestão segura e rastreabilidade  

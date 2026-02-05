@@ -12,43 +12,46 @@
 CREATE DATABASE IF NOT EXISTS ans_despesas
 CHARACTER SET utf8mb4
 COLLATE utf8mb4_unicode_ci;
-
 USE ans_despesas;
 
 CREATE TABLE operadoras (
-    cnpj CHAR(14) PRIMARY KEY,
-    razao_social VARCHAR(255) NOT NULL,
-    registro_ans VARCHAR(20),
+    id_operadora INT PRIMARY KEY AUTO_INCREMENT,
+    reg_ans INT NOT NULL,
+    cnpj CHAR(14),
+    razao_social VARCHAR(255),
     modalidade VARCHAR(100),
     uf CHAR(2),
     
+    UNIQUE (reg_ans),
     INDEX idx_operadoras_uf (uf)
 );
 
 CREATE TABLE despesas_consolidadas (
     id BIGINT PRIMARY KEY AUTO_INCREMENT,
-    cnpj CHAR(14) NOT NULL,
+    id_operadora INT NOT NULL,
     ano INT NOT NULL,
     trimestre VARCHAR(7) NOT NULL,
     valor_despesas DECIMAL(15,2) NOT NULL,
-    
-    INDEX idx_cnpj (cnpj),
+        
     INDEX idx_ano_trimestre (ano, trimestre),
     
     CONSTRAINT fk_despesas_operadora
-    FOREIGN KEY (cnpj)
-    REFERENCES operadoras(cnpj),
+    FOREIGN KEY (id_operadora)
+    REFERENCES operadoras(id_operadora),
     
-    UNIQUE (cnpj, ano, trimestre) 
+    UNIQUE (id_operadora, ano, trimestre) 
 );
 
 CREATE TABLE despesas_agregadas (
     id BIGINT PRIMARY KEY AUTO_INCREMENT,
-    razao_social VARCHAR(255) NOT NULL,
-    uf CHAR(2) NOT NULL,
-    total_despesas DECIMAL(15,2) NOT NULL,
+    id_operadora INT NOT NULL,
+    total_despesas DECIMAL(15,2),
     media_trimestral DECIMAL(15,2),
     desvio_padrao DECIMAL(15,2),
     
-    INDEX idx_agregadas_uf_total (uf, total_despesas)
+    INDEX idx_agregadas_operadora (id_operadora),
+    
+    CONSTRAINT fk_agregadas_operadora
+    FOREIGN KEY (id_operadora)
+    REFERENCES operadoras(id_operadora)
 );

@@ -1,3 +1,9 @@
+-- ==========================================
+-- Staging table
+-- Utilizadas para cargas temporárias e
+-- tratamento inicial dos dados
+-- ==========================================
+
 CREATE TABLE stg_despesas_consolidadas (
     data DATE,
     reg_ans INT,
@@ -7,13 +13,6 @@ CREATE TABLE stg_despesas_consolidadas (
     vl_saldo_final DECIMAL(15,2)
 ) CHARACTER SET utf8mb4
 COLLATE utf8mb4_unicode_ci;
-
-
-
-SELECT DATABASE();
-SHOW TABLES;
-SELECT @@autocommit;
-SET autocommit = 1;
 
 CREATE TABLE str_base_enriquecida (
     data DATE,
@@ -42,17 +41,3 @@ CREATE TABLE stg_despesas_agregadas (
     desvio_padrao DECIMAL(15,2)
 ) CHARACTER SET utf8mb4
 COLLATE utf8mb4_unicode_ci;
-
-SELECT 
-    COUNT(*) AS total,
-    MIN(data) AS primeira_data,
-    MAX(data) AS ultima_data
-FROM str_despesas_consolidadas;
-
-SELECT 
-    COUNT(*)
-FROM ans_despesas.stg_despesas_consolidadas;
-
-SELECT *
-FROM ans_despesas.str_base_enriquecida
-LIMIT 500;

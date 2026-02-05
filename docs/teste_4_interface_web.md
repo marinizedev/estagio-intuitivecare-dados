@@ -124,5 +124,5 @@ Essa abordagem garante que o avaliador compreenda **a lógica do pipeline, escol
 ## Observações finais
 
 - O identificador `registro_ans` foi utilizado no lugar do CNPJ, considerando a consistência e confiabilidade do dado.
-- Toda integração foram realizadem Python, garantindo rastreabilidade e clareza do pipeline.
+- Toda integração foram realizadas em Python, garantindo rastreabilidade e clareza do pipeline.
 - O projeto demonstra capacidade de **tomada de decisão técnica, resolução de problemas práticos** e **documentação clara de trade-offs**, pontos avaliados no teste.

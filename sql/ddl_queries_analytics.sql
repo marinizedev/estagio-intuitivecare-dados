@@ -6,66 +6,110 @@
 
 -- Query 1 - Top 5 operadoras com maior crescimento percentual de despesas
 
-WITH despesas_por_trimestre AS (
+WITH base AS (
     SELECT
-        d.cnpj,
-        o.razao_social,
-        CONCAT(d.ano, '-', d.trimestre) AS periodo,
-        SUM(d.valor_despesas) AS total_despesas
-    FROM despesas_consolidadas d 
-    JOIN operadoras o ON o.cnpj = d.cnpj
-    GROUP BY d.cnpj, o.razao_social, d.ano, d.trimestre
+        id_operadora,
+        ano,
+        trimestre,
+        valor_despesas,
+        (ano * 10 +
+            CASE trimestre
+                WHEN 'T1' THEN 1
+                WHEN 'T2' THEN 2
+                WHEN 'T3' THEN 3
+                WHEN 'T4' THEN 4
+            END
+        ) AS ordem_periodo
+    FROM despesas_consolidadas
 ),
-periodos_extremos AS (
+periodos AS (
     SELECT
-        cnpj,
-        MIN(periodo) AS primeiro_periodo,
-        MAX(periodo) AS ultimo_periodo
-    FROM despesas_por_trimestre
-    GROUP BY cnpj
+        id_operadora,
+        MIN(ordem_periodo) AS primeiro_periodo,
+        MAX(ordem_periodo) AS ultimo_periodo
+    FROM base
+    GROUP BY id_operadora
+    HAVING MIN(ordem_periodo) <> MAX(ordem_periodo)
 ),
-comparativo AS (
-    SELECT 
-        d1.cnpj,
-        d1.razao_social,
-        d1.total_despesas AS despesas_inicio,
-        d2.total_despesas AS despesas_fim,
-        ((d2.total_despesas - d1.total_despesas) / d1.total_despesas) * 100 AS crescimento_percentual
-    FROM periodos_extremos p 
-    JOIN despesas_por_trimestre d1 ON d1.cnpj = p.cnpj AND d1.periodo = p.primeiro_periodo
-    JOIN despesas_por_trimestre d2 ON d2.cnpj = p.cnpj AND d2.periodo = p.ultimo_periodo
-    WHERE d1.total_despesas > 0
+valores AS (
+    SELECT
+        p.id_operadora,
+        b_ini.valor_despesas AS despesa_inicial,
+        b_fim.valor_despesas AS despesa_final
+    FROM periodos p
+    JOIN base b_ini
+        ON b_ini.id_operadora = p.id_operadora
+       AND b_ini.ordem_periodo = p.primeiro_periodo
+    JOIN base b_fim
+        ON b_fim.id_operadora = p.id_operadora
+       AND b_fim.ordem_periodo = p.ultimo_periodo
 )
-SELECT *
-FROM comparativo
-ORDER BY crescimento_percentual DESC LIMIT 5;
+SELECT
+    o.razao_social,
+    despesa_inicial,
+    despesa_final,
+    ROUND(
+        CASE
+            WHEN despesa_inicial = 0 THEN NULL
+            ELSE ((despesa_final - despesa_inicial) / despesa_inicial) * 100
+        END,
+        2
+    ) AS crescimento_percentual
+FROM valores v
+JOIN operadoras o
+    ON o.id_operadora = v.id_operadora
+ORDER BY crescimento_percentual DESC
+LIMIT 5;
 
--- Query 2 - Distribuição e média de despesas por UF
+
+-- Query 2 - Distribuição de despesas por UF com total e média por operadora
 
 SELECT
     o.uf,
-    SUM(d.valor_despesas) AS total_despesas_uf,
-    AVG(d.valor_despesas) AS media_despesas_por_operadora
-FROM despesas_consolidadas d
-JOIN operadoras o ON o.cnpj = d.cnpj
+    SUM(dc.valor_despesas) AS total_despesas,
+    ROUND(
+        SUM(dc.valor_despesas) / COUNT(DISTINCT dc.id_operadora),
+        2
+    ) AS media_por_operadora
+FROM despesas_consolidadas dc
+JOIN operadoras o
+    ON o.id_operadora = dc.id_operadora
 GROUP BY o.uf
-ORDER BY total_despesas_uf DESC LIMIT 5;
+ORDER BY total_despesas DESC
+LIMIT 5;
+
 
 -- Query 3 - Operadoras acima da média geral em pelo menos dois trimestres
 
-WITH media_geral AS (
-    SELECT AVG(valor_despesas) AS media_global
+WITH media_trimestre AS (
+    SELECT
+        ano,
+        trimestre,
+        AVG(valor_despesas) AS media_geral
     FROM despesas_consolidadas
+    GROUP BY ano, trimestre
 ),
-acima_media AS (
-    SELECT 
-        d.cnpj,
-        COUNT(*) AS trimestres_acima_media
-    FROM despesas_consolidadas d
-    CROSS JOIN media_geral m
-    WHERE d.valor_despesas > m.media_global
-    GROUP BY d.cnpj
+comparacao AS (
+    SELECT
+        dc.id_operadora,
+        dc.ano,
+        dc.trimestre,
+        dc.valor_despesas,
+        mt.media_geral
+    FROM despesas_consolidadas dc
+    JOIN media_trimestre mt
+        ON dc.ano = mt.ano
+       AND dc.trimestre = mt.trimestre
+),
+contagem AS (
+    SELECT
+        id_operadora,
+        COUNT(*) AS qtd_trimestres_acima_media
+    FROM comparacao
+    WHERE valor_despesas > media_geral
+    GROUP BY id_operadora
 )
-SELECT COUNT(*) AS total_operadoras
-FROM acima_media
-WHERE trimestres_acima_media >= 2;
+SELECT
+    COUNT(*) AS total_operadoras
+FROM contagem
+WHERE qtd_trimestres_acima_media >= 2;

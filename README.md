@@ -28,7 +28,7 @@ A solução foi organizada em **pipeline de dados e backend**, seguindo boas pr�
 
 1. Leitura e extração dos arquivos trimestrais das Demonstrações Contábeis (`data/raw/`).
 2. Validação da estrutura e consistência dos dados.
-3. Consolidação em **CSV base** (`data/processed/consolidado_despesas.csv`).
+3. Consolidação em **CSV base** (`data/processed/02_base_consolidada_2025.csv`).
 4. Transformações e enriquecimento com dados cadastrais (`04_base_enriquecida_2025.csv`).
 5. Agregações analíticas (`despesas_agregadas.csv`).
 6. Inserção em banco de dados relacional (**MySQL**) via scripts Python para staging e tabelas finais.

@@ -38,14 +38,14 @@ Foi adotada uma modelagem **normalizada**, com separação lógica entre:
 
 ### Tabela `operadoras`
 
-- **Chave primária**: `cnpj`  
+- **Chave primária**: `id_operadora`  
 - **Índice**: `uf`  
 
 Campos:
 
+- `reg_ans`
 - `cnpj`  
 - `razao_social`  
-- `registro_ans`  
 - `modalidade`  
 - `uf`  
 
@@ -54,14 +54,14 @@ Campos:
 ### Tabela `despesas_consolidadas`
 
 - **Chave primária técnica**: `id`  
-- **Chave estrangeira**: `cnpj` → `operadoras`  
-- **Constraint UNIQUE**: (`cnpj`, `ano`, `trimestre`)  
-- **Índices**: consultas por operadoras e período  
+- **Chave estrangeira**: `id_operadora` → `operadoras`  
+- **Constraint UNIQUE**: (`id_operadora`, `ano`, `trimestre`)  
+- **Índices**: `ano`, `trimestre` 
 
 Campos:
 
-- `id`  
-- `cnpj`  
+- `id`
+- `id_operadora`  
 - `ano`  
 - `trimestre`  
 - `valor_despesas`  
@@ -72,15 +72,14 @@ Campos:
 
 ### Tabela `despesas_agregadas`
 
-- Tabela analítica separada da transacional  
-- Estrutura otimizada para leitura e ranking de despesas  
-- Índice composto: `uf` + `total_despesas`  
+- **Chave primária técnica**: `id`
+- **Chave estrangeira**: `id_operadora` → `operadoras`
+- **Índices**: `id_operadora`  
 
 Campos:
 
 - `id`  
-- `razao_social`  
-- `uf`  
+- `id_operadora`  
 - `total_despesas`  
 - `media_trimestral`  
 - `desvio_padrão`  

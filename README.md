@@ -65,6 +65,13 @@ A solução foi estruturada em etapas, seguindo boas práticas de projetos de da
 
 ---
 
+### Adaptação do Identificador da Operadora
+O enunciado do teste propõe o uso do CNPJ como identificador das operadoras. Entretanto, na base oficial disponibilizada pela ANS, o CNPJ encontra-se mascarado, não sendo adequado como chave de consulta.
+
+Dessa forma, foi adotado o campo `registro_ans` como identificador único das operadoras, pois trata-se de um atributo íntegro, consistente e utilizado como chave de relacionamento entre as tabelas do modelo de dados.
+
+---
+
 ## Observações
 Este projeto prioriza **clareza, organização, coerência técnica e justificativa das decisões**, evitando complexidade desnecessária e mantendo  alinhamento com o escopo e os objetivos do processo seletivo.
 

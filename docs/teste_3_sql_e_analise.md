@@ -55,7 +55,7 @@ Campos:
 
 - **Chave primária técnica**: `id`  
 - **Chave estrangeira**: `id_operadora` → `operadoras`  
-- **Constraint UNIQUE**: (`id_operadora`, `ano`, `trimestre`)  
+- **UNIQUE**: (`id_operadora`, `ano`, `trimestre`)  
 - **Índices**: `ano`, `trimestre` 
 
 Campos:

@@ -6,7 +6,7 @@ Este documento descreve, de forma objetiva, as decisões técnicas adotadas na e
 
 ## Observação sobre CNPJ
 
-Embora o enunciado mencione CNPJ como identificador, a bse oficial da ANS disponibiliza o CNPJ mascarado. Por esse motivo, foi utilizado o `registro_ans` como identificador único e confiável das operadoras.
+Embora o enunciado mencione CNPJ como identificador, a base oficial da ANS disponibiliza o CNPJ mascarado. Por esse motivo, foi utilizado o `registro_ans` como identificador único e confiável das operadoras.
 
 ---
 

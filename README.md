@@ -6,78 +6,132 @@ O objetivo do projeto é demonstrar conhecimentos fundamentais em **manipulaçã
 ---
 
 ## Objetivo do Projeto
-Desenvolver uma solução de dados a partir de fontes públicas, contemplando etapas de **extração, tratamento, consolidação, consultas e visualização**, conforme os requisitos do teste técnico proposto pela IntuitiveCare.
+Desenvolver uma solução de dados a partir de fontes públicas, contemplando etapas de **extração, tratamento, consolidação, consultas e exposição via API**, respeitando os requisitos do teste técnico proposto.
 
-O projeto tem como foco a construção de um pipeline de dados **claro, reproduzível, organizado e bem documentado**, priorizando qualidade técnica e transparência nas decisões adotadas.
+O projeto prioriza **clareza, reprodutibilidade e organização**, com documentação que justifica cada decisão técnica adotada.
 
 ---
 
 ## Contexto dos Dados
-Os dados utilizados neste projeto são provenientes das **Demonstrações Contábeis** disponibilizadas publicamente pela **ANS (Agência Nacional de Saúde Suplementar)**.
+Os dados utilizados são provenientes das **Demonstrações Contábeis** disponibilizadas publicamente pela **ANS (Agência Nacional de Saúde Suplementar)**.
 
-Durante a análise da fonte oficial, foi identificado que alguns campos citados no enunciado do teste (como **CNPJ, razão social e despesas**) **não estão disponíveis nos arquivos fornecidos**. Dessa forma, as decisões técnicas foram adaptadas para utilizar exclusivamente os dados efetivamente existentes, garantindo **consistência, rastreabilidade, transparência e clareza** ao longo da solução.
-
-Foram considerados os **três trimestres mais recentes disponíveis na fonte**, correspondentes ao ano de **2025**.
+Observações importantes:
+- Alguns campos mencionados no enunciado (como **CNPJ, razão social e despesas**) **não estão disponíveis nos arquivos originais**.
+- O CNPJ encontra-se mascarado na fonte oficial; por isso, adotou-se **`registro_ans`** como identificador único confiável das operadoras.
+- Foram considerados os **três trimestres mais recentes disponíveis**, referentes ao ano de **2025**.
 
 ---
 
 ## Visão Geral da Solução
-A solução foi estruturada em etapas, seguindo boas práticas de projetos de dados:
 
-1. Leitura e extração dos arquivos trimestrais das Demonstrações Contábeis;
-2. Validação da estrutura e integridade dos dados;
-3. Consolidação dos dados em um **arquivo CSV base**;
-4. Transformações adicionais para geração de um **CSV final**, conforme solicitado no teste;
-5. Criação de consultas e agregações utilizando **SQL**;
-6. Implementação de camadas adicionais (back-end e front-end) para exposição e análise dos dados;
-7. Documentação das decisões técnicas adotadas ao longo do processo.
+A solução foi organizada em **pipeline de dados e backend**, seguindo boas práticas:
+
+1. Leitura e extração dos arquivos trimestrais das Demonstrações Contábeis (`data/raw/`).
+2. Validação da estrutura e consistência dos dados.
+3. Consolidação em **CSV base** (`data/processed/consolidado_despesas.csv`).
+4. Transformações e enriquecimento com dados cadastrais (`04_base_enriquecida_2025.csv`).
+5. Agregações analíticas (`despesas_agregadas.csv`).
+6. Inserção em banco de dados relacional (**MySQL**) via scripts Python para staging e tabelas finais.
+7. Implementação de API com **FastAPI** para exposição dos dados.
+8. Documentação detalhada das decisões técnicas por teste (`docs/`).
 
 ---
 
 ## Tecnologias Utilizadas
-- Python
-- Pandas
-- CSV
-- SQL
-- MySQL (ou outro banco relacional, conforme aplicação)
-- Git / GitHub
+- **Python** (Pandas para manipulação, scripts de inserts)
+- **CSV** (entrada e saída de dados)
+- **MySQL** (armazenamento relacional)
+- **SQL** (consultas analíticas)
+- **FastAPI** (API para exposição de dados)
+- **Git / GitHub** (versionamento e entrega)
 
 ---
 
-## Estruturas do Repositório
+## Estrutura do Repositório
 
 - /estagio-intuitivecare-dados/
 - |
+- |---- backend/
+- |
+    - |---- routers/
+        - |---- despesas.py
+        - |---- estatisticas.py
+        - |---- operadoras.py
+        - |
+    - |---- database.py
+    - |---- main.py
+    - |---- requeriments.txt
+    - |
 - |---- data/
-    - |---- raw/     # arquivos originais (ou links)
-    - |---- processed/      # CSV base e CSV final
-- |
-- |---- scripts/
-    - |---- extracao/    # Teste 1
-    - |---- transform/   # Teste 2
-- |
-- |---- sql/
-    - |---- consultas.sql
+    - |---- processed/     # CSV base e CSV final
+    - |---- raw/      # arquivos originais
 - |
 - |---- docs/
-    - |---- explicacoes_tecnicas.md
+    - |---- teste_1_ingestao_e_consolidadacao.md
+    - |---- teste_2_transformacao_e_validacao.md
+    - |---- teste_3_sql_e_analise.md
+    - |---- teste_4_interface_web.md
+    - |
+- |---- scripts/
+    - |---- 01_extracao/
+        - |---- extrair_dados.py
+        - |
+    - |---- 02_transform/
+        - |---- agregacao_dados.py
+        - |---- consolidar_dados.py
+        - |---- enriquecimento_dados.py
+        - |---- validacao_dados.py
+        - |
+    - |---- 03_inserts_staging/
+        - |---- agregado.py
+        - |---- consolidado.py
+        - |---- enriquecido.py
+        - |
+    - |---- 04_inserts_oficiais
+        - |---- agregado.py
+        - |---- consolidado.py
+        - |---- enriquecido.py
+        - |
+- |---- sql
+    - |---- ddl_ans_despesas.sql
+    - |---- ddl_queries_analytics.sql
+    - |---- staging.sql
+    - |
 - |---- README.md
 
 ---
 
-### Adaptação do Identificador da Operadora
-O enunciado do teste propõe o uso do CNPJ como identificador das operadoras. Entretanto, na base oficial disponibilizada pela ANS, o CNPJ encontra-se mascarado, não sendo adequado como chave de consulta.
+## Observações Técnicas Importantes
 
-Dessa forma, foi adotado o campo `registro_ans` como identificador único das operadoras, pois trata-se de um atributo íntegro, consistente e utilizado como chave de relacionamento entre as tabelas do modelo de dados.
+- **Arquivos grandes** (CSVs >100MB) não foram versionados; são gerados automaticamente pelos scripts.
+- **__pycache__** está ignorado pelo `.gitignore`.
+- Os arquivos `__init__.py` permanecem no repositório para garantir que o Python reconheça os pacotes.
+- A inserção de dados no banco foi feita via **Python**, e não via `LOAD DATA INFILE`, para manter compatibilidade e segurança de execução em ambiente Windows.
+- A API implementada com **FastAPI** retorna dados paginados com metadados e busca no servidor, garantindo performance mesmo com grandes volumes de dados.
 
 ---
 
-## Observações
-Este projeto prioriza **clareza, organização, coerência técnica e justificativa das decisões**, evitando complexidade desnecessária e mantendo  alinhamento com o escopo e os objetivos do processo seletivo.
+## Adaptação do Identificador da Operadora
 
-Todas as etapsa foram desenvolvidas com foco em **reprodutibilidade, legibilidade e boas práticas**, refletindo o processo de aprendizado e aplicação prática dos conhecimentos adquiridos.
+- Embora o enunciado mencione CNPJ, na prática **a base oficial disponibiliza o CNPJ mascarado**.
+- Para consistência e integridade, **`registro_ans`** foi adotado como identificador único das operadoras, usado em todas as tabelas e relações do banco de dados.
+
+---
+
+## Considerações Finais
+
+Este projeto prioriza:
+
+- Clareza e organização técnica
+- Justificativa das decisões adotadas
+- Qualidade e rastreabilidade dos dados
+- Boas práticas em Python, SQL e desenvolvimento de APIs
+- Reprodutibilidade de todo o pipeline de dados
+
+O README reflete a **visão geral do projeto**, enquanto os detalhes técnicos de cada teste estão documentados separadamente em `docs/`.
+
+---
 
 ## Autora
-Projeto desenvolvido por **Marinize Santana**, como parte do teste técnico de nivelamento do processo seletivo de **Estágio na IntuitiveCare (2026)**.
 
-Este repositório reflete o processo de aprendizado, análise e aplicação prática de conceitos de dados, com foco em organização, clareza e boas práticas.
+**Marinize Santana** – desenvolvimento da solução como parte do teste técnico de nivelamento do processo seletivo de **Estágio na IntuitiveCare (2026)**.

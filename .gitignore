@@ -3,4 +3,3 @@ __pycache__/
 .env
 data/raw/*.csv
 data/processed/*.csv
-__init__.py
